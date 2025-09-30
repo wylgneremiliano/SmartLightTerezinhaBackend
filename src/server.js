@@ -34,29 +34,44 @@ app.get('/lista-dispositivos', (req, res) => {
         return res.json([
             {
                 "id": "1",
-                "tipo": "Sensor de Temperatura",
-                "nome": "Sensor 1",
-                "grupo": "Grupo A",
+                "tipo": "lampada",
+                "nome": "lampada_sala_1",
+                "grupo": "salas",
                 "status_conexao": true,
                 "estado": true
 
             }, {
                 "id": "2",
-                "tipo": "Sensor de Umidade",
-                "nome": "Sensor 2",
-                "grupo": "Grupo B",
+                "tipo": "lampada",
+                "nome": "lampada_sala_2",
+                "grupo": "Salas",
                 "status_conexao": false,
                 "estado": false
             },
             {
                 "id": "3",
-                "tipo": "Atuador de Luz",
-                "nome": "Atuador 1",
-                "grupo": "Grupo A",
+                "tipo": "lampada",
+                "nome": "lampada_secretaria_1",
+                "grupo": "Secretaria",
                 "status_conexao": true,
                 "estado": true
-
-            }
+            },
+            {
+                "id": "4",
+                "tipo": "lampada",
+                "nome": "lampada_secretaria_2",
+                "grupo": "Secretaria",
+                "status_conexao": true,
+                "estado": true
+            },
+            {
+                "id": "5",
+                "tipo": "lampada",
+                "nome": "lampada_refeitorio_1",
+                "grupo": "Refeitório",
+                "status_conexao": true,
+                "estado": false
+            },
 
         ]);
     });
