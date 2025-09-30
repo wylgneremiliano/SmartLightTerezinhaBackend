@@ -20,6 +20,55 @@ app.post('/login', (req, res) => {
     return res.status(401).json({ message: 'Credênciais invalidas!' });
 });
 
+app.get('/lista-dispositivos-sem-token', (req, res) => {
+   
+    return res.json([
+        {
+            "id": "1",
+            "tipo": "lampada",
+            "nome": "lampada_sala_1",
+            "grupo": "salas",
+            "status_conexao": true,
+            "estado": true
+
+        }, {
+            "id": "2",
+            "tipo": "lampada",
+            "nome": "lampada_sala_2",
+            "grupo": "Salas",
+            "status_conexao": false,
+            "estado": false
+        },
+        {
+            "id": "3",
+            "tipo": "lampada",
+            "nome": "lampada_secretaria_1",
+            "grupo": "Secretaria",
+            "status_conexao": true,
+            "estado": true
+        },
+        {
+            "id": "4",
+            "tipo": "lampada",
+            "nome": "lampada_secretaria_2",
+            "grupo": "Secretaria",
+            "status_conexao": true,
+            "estado": true
+        },
+        {
+            "id": "5",
+            "tipo": "lampada",
+            "nome": "lampada_refeitorio_1",
+            "grupo": "Refeitório",
+            "status_conexao": true,
+            "estado": false
+        },
+
+    ]);
+});
+
+
+
 app.get('/lista-dispositivos', (req, res) => {
     const token = req.headers['authorization']?.split(' ')[1];
 
