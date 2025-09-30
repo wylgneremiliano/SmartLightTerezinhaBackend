@@ -27,7 +27,7 @@ app.get('/lista-dispositivos-sem-token', (req, res) => {
             "id": "1",
             "tipo": "lampada",
             "nome": "lampada_sala_1",
-            "grupo": "salas",
+            "grupo": "Salas",
             "status_conexao": true,
             "estado": true
 
