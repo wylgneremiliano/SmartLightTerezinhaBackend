@@ -21,7 +21,7 @@ app.post('/login', (req, res) => {
 });
 
 app.get('/lista-dispositivos-sem-token', (req, res) => {
-   
+
     return res.json([
         {
             "id": "1",
@@ -60,6 +60,38 @@ app.get('/lista-dispositivos-sem-token', (req, res) => {
             "tipo": "lampada",
             "nome": "lampada_refeitorio_1",
             "grupo": "Refeitório",
+            "status_conexao": true,
+            "estado": false
+        },
+        {
+            "id": "6",
+            "tipo": "tv",
+            "nome": "tv_sala_1",
+            "grupo": "Salas",
+            "status_conexao": true,
+            "estado": false
+        },
+        {
+            "id": "7",
+            "tipo": "tv",
+            "nome": "tv_biblioteca_1",
+            "grupo": "Biblioteca",
+            "status_conexao": true,
+            "estado": false
+        },
+        {
+            "id": "8",
+            "tipo": "projetor",
+            "nome": "projetor_sala_1",
+            "grupo": "Salas",
+            "status_conexao": true,
+            "estado": false
+        },
+        {
+            "id": "9",
+            "tipo": "interruptor",
+            "nome": "interruptor_sala_1",
+            "grupo": "Salas",
             "status_conexao": true,
             "estado": false
         },
@@ -118,6 +150,38 @@ app.get('/lista-dispositivos', (req, res) => {
                 "tipo": "lampada",
                 "nome": "lampada_refeitorio_1",
                 "grupo": "Refeitório",
+                "status_conexao": true,
+                "estado": false
+            },
+            {
+                "id": "6",
+                "tipo": "tv",
+                "nome": "tv_sala_1",
+                "grupo": "Salas",
+                "status_conexao": true,
+                "estado": false
+            },
+            {
+                "id": "7",
+                "tipo": "tv",
+                "nome": "tv_biblioteca_1",
+                "grupo": "Biblioteca",
+                "status_conexao": true,
+                "estado": false
+            },
+            {
+                "id": "8",
+                "tipo": "projetor",
+                "nome": "projetor_sala_1",
+                "grupo": "Salas",
+                "status_conexao": true,
+                "estado": false
+            },
+            {
+                "id": "9",
+                "tipo": "interruptor",
+                "nome": "interruptor_sala_1",
+                "grupo": "Salas",
                 "status_conexao": true,
                 "estado": false
             },
