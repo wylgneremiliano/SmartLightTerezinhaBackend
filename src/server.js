@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
+import mqtt from "mqtt"
 
 const app = express();
 
@@ -10,6 +11,39 @@ app.use(express.json());
 
 const secretKey = 'teste123';
 
+
+const mqttHost = 'mqtt://localhost';
+const client = mqtt.connect(mqttHost);
+
+let devices = {};
+
+client.on('connect', () => {
+    console.log('Conectado ao MQTT do Zigbee2MQTT');
+
+
+    client.subscribe('zigbee2mqtt/bridge/response/devices', () => {
+        client.publish('zigbee2mqtt/bridge/request/devices', '{}');
+    });
+
+    client.subscribe('zigbee2mqtt/bridge/devices', () => {
+        client.publish('zigbee2mqtt/bridge/request/devices', '{}');
+    })
+
+    client.subscribe('zigbee2mqtt/+/+');
+});
+
+client.on('message', (topic, message) => {
+    try {
+        const payload = JSON.parse(message.toString());
+        console.log(topic)
+        if (payload && topic === 'zigbee2mqtt/bridge/devices')
+            devices = payload;
+        return;
+
+    } catch (err) {
+        console.error('Erro ao processar mensagem MQTT:', err);
+    }
+});
 app.post('/login', (req, res) => {
     const { usuario, senha } = req.body;
 
@@ -19,6 +53,33 @@ app.post('/login', (req, res) => {
     }
     return res.status(401).json({ message: 'Credênciais invalidas!' });
 });
+
+
+app.get('/devices', (req, res) => {
+    res.json(devices);
+});
+
+
+
+app.post('/device/:id/on', (req, res) => {
+    const deviceId = req.params.id;
+    const topic = `zigbee2mqtt/${deviceId}/set`;
+    client.publish(topic, JSON.stringify({ state: "ON" }), (err) => {
+        if (err) return res.status(500).send(err.message);
+        res.send(`Dispositivo ${deviceId} ligado`);
+    });
+});
+
+app.post('/device/:id/off', (req, res) => {
+    const deviceId = req.params.id;
+    const topic = `zigbee2mqtt/${deviceId}/set`;
+    client.publish(topic, JSON.stringify({ state: "OFF" }), (err) => {
+        if (err) return res.status(500).send(err.message);
+        res.send(`Dispositivo ${deviceId} desligado`);
+    });
+});
+
+
 
 app.get('/lista-dispositivos-sem-token', (req, res) => {
 
