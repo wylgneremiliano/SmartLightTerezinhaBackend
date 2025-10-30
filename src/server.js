@@ -3,6 +3,7 @@ import cors from 'cors';
 import jwt from 'jsonwebtoken';
 import mqtt from 'mqtt';
 import { formataGrupo } from './utils/formataGrupo/index.js';
+import { formataEstado } from './utils/formataEstado/index.js';
 
 
 
@@ -61,7 +62,7 @@ function iniciarMonitoramentoZigbee() {
 
             if (!deviceName) return;
             if (dispositivos)
-                dispositivos.map((d) => d.nome === deviceName ? d.estado = payload.state_left : false);
+                dispositivos.map((d) => d.nome === deviceName ? d.estado = formataEstado(payload.state_left) : false);
 
 
             console.log(`Estado completo atualizado: ${deviceName}`);
