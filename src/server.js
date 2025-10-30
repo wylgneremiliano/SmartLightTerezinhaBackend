@@ -61,11 +61,7 @@ function iniciarMonitoramentoZigbee() {
 
             if (!deviceName) return;
             if (dispositivos)
-                dispositivos.map((d) => d.nome === deviceName ? d.estado = {
-                    state_left: payload.state_left,
-                    state_right: payload.state_right,
-                    state_center: payload.state_center,
-                } : null);
+                dispositivos.map((d) => d.nome === deviceName ? d.estado = payload.state_left : false);
 
 
             console.log(`Estado completo atualizado: ${deviceName}`);
@@ -229,5 +225,5 @@ app.get('/private', (req, res) => {
 
 app.listen(3000, () => {
     console.log(`🚀 Servidor Express rodando em http://localhost:${3000}`);
-    dispositivos = iniciarMonitoramentoZigbee(dispositivos);
+    dispositivos = iniciarMonitoramentoZigbee();
 });
