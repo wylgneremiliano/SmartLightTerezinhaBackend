@@ -1,7 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import jwt from 'jsonwebtoken';
-import mqtt from "mqtt"
+import mqtt from 'mqtt';
+import { formataGrupo } from './utils/formataGrupo/index.js';
+
+
 
 const app = express();
 
@@ -14,36 +17,69 @@ const secretKey = 'teste123';
 
 const mqttHost = 'mqtt://localhost';
 const client = mqtt.connect(mqttHost);
+let dispositivos = [];
 
-let devices = {};
+function iniciarMonitoramentoZigbee() {
+    const client = mqtt.connect("mqtt://localhost:1883");
 
-client.on('connect', () => {
-    console.log('Conectado ao MQTT do Zigbee2MQTT');
+    client.on("connect", () => {
+        console.log("✅ Conectado ao broker MQTT do Zigbee2MQTT");
 
 
-    client.subscribe('zigbee2mqtt/bridge/response/devices', () => {
-        client.publish('zigbee2mqtt/bridge/request/devices', '{}');
+        client.subscribe([
+            "zigbee2mqtt/bridge/devices",
+            "zigbee2mqtt/bridge/event",
+            "zigbee2mqtt/+/state",
+            "zigbee2mqtt/#"
+        ], (err) => {
+            if (err) console.error("Erro ao se inscrever nos tópicos:", err);
+        });
+
     });
 
-    client.subscribe('zigbee2mqtt/bridge/devices', () => {
-        client.publish('zigbee2mqtt/bridge/request/devices', '{}');
-    })
+    client.on("message", (topic, message) => {
+        try {
+            const payload = JSON.parse(message.toString());
 
-    client.subscribe('zigbee2mqtt/+/+');
-});
 
-client.on('message', (topic, message) => {
-    try {
-        const payload = JSON.parse(message.toString());
-        console.log(topic)
-        if (payload && topic === 'zigbee2mqtt/bridge/devices')
-            devices = payload;
-        return;
+            if (topic === "zigbee2mqtt/bridge/devices") {
+                dispositivos = payload.map((device) => ({
+                    id: device.ieee_address,
+                    tipo: device.type || "Desconhecido",
+                    nome: device.friendly_name || device.ieee_address,
+                    modelo: device.model_id || "N/D",
+                    grupo: formataGrupo(device.friendly_name),
+                    status_conexao: device.interview_state === "SUCCESSFUL",
+                    estado: false,
+                })).filter(d => d.tipo !== "Coordinator");
 
-    } catch (err) {
-        console.error('Erro ao processar mensagem MQTT:', err);
-    }
-});
+
+                console.log("Lista de dispositivos atualizada");
+            }
+            const parts = topic.split("/");
+            const deviceName = parts[1];
+
+            if (!deviceName) return;
+            if (dispositivos)
+                dispositivos.map((d) => d.nome === deviceName ? d.estado = {
+                    state_left: payload.state_left,
+                    state_right: payload.state_right,
+                    state_center: payload.state_center,
+                } : null);
+
+
+            console.log(`Estado completo atualizado: ${deviceName}`);
+
+        } catch (err) {
+            console.error("Erro ao processar mensagem MQTT:", err);
+        }
+    });
+
+    client.on("error", (err) => {
+        console.error("Erro no MQTT:", err);
+    });
+}
+
 app.post('/login', (req, res) => {
     const { usuario, senha } = req.body;
 
@@ -55,10 +91,9 @@ app.post('/login', (req, res) => {
 });
 
 
-app.get('/devices', (req, res) => {
-    res.json(devices);
+app.get("/devices", (req, res) => {
+    res.json(dispositivos);
 });
-
 
 
 app.post('/device/:id/on', (req, res) => {
@@ -82,82 +117,7 @@ app.post('/device/:id/off', (req, res) => {
 
 
 app.get('/lista-dispositivos-sem-token', (req, res) => {
-
-    return res.json([
-        {
-            "id": "1",
-            "tipo": "lampada",
-            "nome": "lampada_sala_1",
-            "grupo": "Salas",
-            "status_conexao": true,
-            "estado": true
-
-        }, {
-            "id": "2",
-            "tipo": "lampada",
-            "nome": "lampada_sala_2",
-            "grupo": "Salas",
-            "status_conexao": false,
-            "estado": false
-        },
-        {
-            "id": "3",
-            "tipo": "lampada",
-            "nome": "lampada_secretaria_1",
-            "grupo": "Secretaria",
-            "status_conexao": true,
-            "estado": true
-        },
-        {
-            "id": "4",
-            "tipo": "lampada",
-            "nome": "lampada_secretaria_2",
-            "grupo": "Secretaria",
-            "status_conexao": true,
-            "estado": true
-        },
-        {
-            "id": "5",
-            "tipo": "lampada",
-            "nome": "lampada_refeitorio_1",
-            "grupo": "Refeitório",
-            "status_conexao": true,
-            "estado": false
-        },
-        {
-            "id": "6",
-            "tipo": "tv",
-            "nome": "tv_sala_1",
-            "grupo": "Salas",
-            "status_conexao": true,
-            "estado": false
-        },
-        {
-            "id": "7",
-            "tipo": "tv",
-            "nome": "tv_biblioteca_1",
-            "grupo": "Biblioteca",
-            "status_conexao": true,
-            "estado": false
-        },
-        {
-            "id": "8",
-            "tipo": "projetor",
-            "nome": "projetor_sala_1",
-            "grupo": "Salas",
-            "status_conexao": true,
-            "estado": false
-        },
-        {
-            "id": "9",
-            "tipo": "interruptor",
-            "nome": "interruptor_sala_1",
-            "grupo": "Salas",
-            "status_conexao": true,
-            "estado": false
-        },
-
-    ]);
+    res.json(dispositivos);
 });
 
 
@@ -266,6 +226,8 @@ app.get('/private', (req, res) => {
     });
 });
 
+
 app.listen(3000, () => {
-    console.log('Server is running on port 3000');
+    console.log(`🚀 Servidor Express rodando em http://localhost:${3000}`);
+    dispositivos = iniciarMonitoramentoZigbee(dispositivos);
 });
